@@ -22,8 +22,7 @@
         .date-picker-group { display:flex; align-items:center; background:rgba(255,255,255,0.15); border-radius:7px; overflow:hidden; }
         .date-picker-group button { background:transparent; border:none; color:#fff; cursor:pointer; padding:7px 10px; font-size:0.9rem; font-weight:bold; transition: background 0.2s; }
         .date-picker-group button:hover { background:rgba(255,255,255,0.25); }
-        .date-picker-group input[type="date"], .date-picker-group input[type="month"] { padding:6px 5px; border:none; font-size:.85rem; background:transparent; color:#fff; cursor:pointer; outline:none; font-weight: 600; text-align:center; }
-        
+        .date-picker-group input[type="date"], .date-picker-group input[type="month"] { padding:7px 5px; border:none; font-size:.85rem; background:transparent; color:#fff; cursor:pointer; outline:none; font-weight: 600; text-align:center; }
         .app-header input::-webkit-calendar-picker-indicator { filter:invert(1); opacity:.9; cursor:pointer; }
         
         input[type="month"], input[type="number"], input[type="text"], input[type="password"] { padding:6px 10px; border:none; border-radius:7px; font-size:.85rem; outline:none; font-weight: 600; }
@@ -152,8 +151,6 @@
             .giay-body p.sub { margin-left: 20px !important; }
             .giay-summary { margin-bottom: 8px !important; font-size: 14px; }
             .giay-vang-header { margin-top: 15px !important; margin-bottom: 4px !important; font-size: 14px;}
-            
-            /* Tùy chỉnh người ký A5 */
             .giay-signer { margin-top: 30px; text-align: right; font-size: 14px; padding-right: 20px; }
         }
     </style>
@@ -363,7 +360,7 @@
 
 <script>
 // =============== ĐIỀN ĐƯỜNG LINK CỦA BẠN VÀO ĐÂY ===============
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbytF_0W0_B5--RGfcOcpfrKcBYCQbYHHDkCfPFox7bgFbWQ4U69_Au-nKbnzGaKBcai/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzgTInTq_1I8uL_hKxXFzYlPj44tCReI8e13-24FhM5rA4B1ZpS/exec";
 window.GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1quOFnjezLTWxUuo2Wj0LWdmqjpat7knyY7D8Kconw9A/edit";
 // ===============================================================
 
@@ -625,7 +622,7 @@ window.updateBedCount = function(inp) {
     if(!countDiv || !countDiv.classList.contains('bed-count')) return;
     if(inp.disabled || !inp.value.trim()) { countDiv.textContent = '0'; return; }
     
-    let str = inp.value.replace(/G/gi, '').replace(/SÁNG:/gi, '').replace(/CHIỀU:/gi, '').replace(/ĐẾN/gi, '-').replace(/\s+/g, '');
+    let str = inp.value.replace(/giường/gi, '').replace(/g/gi, '').replace(/sáng:/gi, '').replace(/chiều:/gi, '').replace(/đến/gi, '-').replace(/ĐẾN/gi, '-').replace(/\s+/g, '');
     let count = 0; let parts = str.split(',');
     parts.forEach(p => {
         if(p.includes('-')) {
@@ -858,6 +855,18 @@ async function loadPhanGiuongNgay(isForceAuto, liveEntries) {
     } else { document.getElementById('phanGiuongNgayContent').innerHTML = `<div style="text-align: center; color: #dc2626; padding: 20px;">⚠️ Lỗi: ${res.message}</div>`; }
 }
 
+document.getElementById('btnPhanGiuongNgaySave')?.addEventListener('click', async () => {
+    const btnSave = document.getElementById('btnPhanGiuongNgaySave'); btnSave.disabled = true; btnSave.textContent = '⏳ Đang lưu...';
+    const dataToSave = []; 
+    document.querySelectorAll('.pg-row').forEach(r => {
+        let inpSang = r.querySelector('.pgn-sang'); let inpChieu = r.querySelector('.pgn-chieu');
+        if(inpSang && inpChieu) { dataToSave.push({ ten: inpSang.getAttribute('data-ten'), chucdanh: inpSang.getAttribute('data-cd'), giuong_sang: inpSang.value, giuong_chieu: inpChieu.value }); }
+    });
+    try {
+        const res = await apiFetch('POST', 'save_phan_giuong_ngay', { ngay: document.getElementById('phanGiuongNgayDate').value, data: JSON.stringify(dataToSave), user: loggedUser, token: loggedToken }); 
+        alert(res.message);
+    } catch(err) { alert('Lỗi: ' + err.message); } finally { btnSave.disabled = false; btnSave.innerHTML = '💾 Lưu cấu hình tùy chỉnh'; }
+});
 
 // ZALO CHỤP HÌNH GỬI ĐIỆN THOẠI
 document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
@@ -878,6 +887,11 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
     footerUI.style.display = 'none';
     titleUI.style.display = 'none';
     
+    const origOverlayPos = document.getElementById('phanGiuongNgayModal').style.position;
+    const origOverlayAlign = document.getElementById('phanGiuongNgayModal').style.alignItems;
+    document.getElementById('phanGiuongNgayModal').style.position = 'absolute';
+    document.getElementById('phanGiuongNgayModal').style.alignItems = 'flex-start';
+    
     const origMaxHeight = modalBox.style.maxHeight;
     const origOverflow = modalBox.style.overflowY;
     modalBox.style.maxHeight = 'none';
@@ -887,12 +901,18 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
     const contentBox = document.getElementById('phanGiuongNgayContent');
     const printHeader = document.createElement('div');
     let d = parseNgay(document.getElementById('phanGiuongNgayDate').value || todayStr());
-    printHeader.innerHTML = `<h2 style="text-align:center; color:#1e40af; margin: 0 0 15px 0;">BẢNG PHÂN GIƯỜNG NGÀY ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}</h2>`;
+    printHeader.innerHTML = `<h2 style="text-align:center; color:#1e40af; margin: 20px 0 15px 0;">BẢNG PHÂN GIƯỜNG NGÀY ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}</h2>`;
     contentBox.insertBefore(printHeader, contentBox.firstChild);
 
     try {
-        await new Promise(r => setTimeout(r, 200)); 
-        const canvas = await html2canvas(modalBox, { scale: 2, backgroundColor: "#ffffff" });
+        window.scrollTo(0,0);
+        await new Promise(r => setTimeout(r, 300)); 
+        const canvas = await html2canvas(modalBox, { 
+            scale: 2, 
+            backgroundColor: "#ffffff",
+            scrollY: -window.scrollY,
+            windowHeight: modalBox.scrollHeight
+        });
         
         canvas.toBlob(async (blob) => {
             const file = new File([blob], "BangPhanGiuong.png", { type: "image/png" });
@@ -918,6 +938,10 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
         headerUI.style.display = origHeaderDisplay;
         footerUI.style.display = origFooterDisplay;
         titleUI.style.display = origTitleDisplay;
+        
+        document.getElementById('phanGiuongNgayModal').style.position = origOverlayPos;
+        document.getElementById('phanGiuongNgayModal').style.alignItems = origOverlayAlign;
+        
         modalBox.style.maxHeight = origMaxHeight || '98vh';
         modalBox.style.overflowY = origOverflow || 'auto';
         btn.innerHTML = oldText;
@@ -983,6 +1007,14 @@ document.getElementById('btnLoadPhanGiuongThang')?.addEventListener('click', asy
     } else { document.getElementById('phanGiuongThangContent').innerHTML = `<div style="text-align: center; color: #dc2626; padding: 20px;">⚠️ Lỗi: Không thể lấy Mẫu Tháng. Cần tải bảng chấm công tháng trước.</div>`; }
 });
 
+document.getElementById('btnPhanGiuongThangSave')?.addEventListener('click', async () => {
+    const btnSave = document.getElementById('btnPhanGiuongThangSave'); btnSave.disabled = true; btnSave.textContent = '⏳ Đang lưu...';
+    const dataToSave = []; document.querySelectorAll('.pgm-input').forEach(inp => { dataToSave.push({ ten: inp.getAttribute('data-ten'), chucdanh: inp.getAttribute('data-cd'), giuong: inp.value }); });
+    try {
+        const res = await apiFetch('POST', 'save_phan_giuong', { thang: document.getElementById('phanGiuongThangThang').value, data: JSON.stringify(dataToSave), user: loggedUser, token: loggedToken }); alert(res.message);
+    } catch(err) { alert('Lỗi: ' + err.message); } finally { btnSave.disabled = false; btnSave.innerHTML = '💾 Lưu mẫu tháng'; }
+});
+
 // ================= CÁC MODAL TIỆN ÍCH KHÁC =================
 document.getElementById('btnShowLichTruc')?.addEventListener('click', () => { document.getElementById('lichTrucDate').value = ngayInput.value ? formatNgayInput(parseNgay(ngayInput.value)) : formatNgayInput(new Date()); document.getElementById('lichTrucModal').style.display = 'flex'; loadLichTrucData(); });
 document.getElementById('btnLichTrucClose')?.addEventListener('click', () => { document.getElementById('lichTrucModal').style.display = 'none'; });
@@ -1043,18 +1075,32 @@ document.getElementById('btnPrintConfirm')?.addEventListener('click', async func
     } finally { this.disabled = false; this.textContent = '🖨️ In'; }
 });
 async function getDataForNgay(ngay) { if (ngay === ngayInput.value) return [...gridCC.querySelectorAll('select')].map(s => ({ ten: s.dataset.ten, kyhieu: s.value })); const res = await apiFetch('GET', 'day', { ngay }); return res.success ? (res.data || []) : []; }
+
 function buildGiayHtml(ngayStr, data) {
     const d = parseNgay(ngayStr); const ngayText = `${THU[d.getDay()]} , ngày ${d.getDate()} tháng ${d.getMonth()+1} năm ${d.getFullYear()}`;
     const bySymbol = {}; data.forEach(r => { if (!r.kyhieu) return; (bySymbol[r.kyhieu] = bySymbol[r.kyhieu] || []).push(r.ten); });
     const namesOf = ma => (bySymbol[ma]||[]).map(esc).join(', '); const countOf = ma => (bySymbol[ma]||[]).length;
     const hienDienCount = ['+', '+/N', 'N/+', 'T'].reduce((s,ma) => s + countOf(ma), 0); const vangCount = Object.values(bySymbol).reduce((s,arr) => s + arr.length, 0) - hienDienCount;
     let body = `<p class="giay-summary"><strong>Tổng: ${data.length} — Hiện diện: ${hienDienCount}</strong></p>`;
+    
+    // Cập nhật in đậm: Chỉ in đậm Nhãn Ký hiệu, không in đậm tên nhân viên
     if (countOf('+') > 0) body += `<p>- <strong>${esc((KY_HIEU['+']||{}).label || 'Làm ngày')}:</strong> <span style="font-weight:normal;">${namesOf('+')}</span></p>`;
     if (countOf('+/N') > 0) body += `<p class="sub">+ <strong>Làm sáng:</strong> <span style="font-weight:normal;">${namesOf('+/N')}</span></p>`;
     if (countOf('N/+') > 0) body += `<p class="sub">+ <strong>Làm chiều:</strong> <span style="font-weight:normal;">${namesOf('N/+')}</span></p>`;
     if (countOf('T') > 0) body += `<p>- <strong>Trực:</strong> <span style="font-weight:normal;">${namesOf('T')}</span></p>`;
-    if (vangCount > 0) { body += `<p class="giay-vang-header"><strong>Vắng: ${vangCount}</strong></p>`; for (const ma in KY_HIEU) if (!['+', '+/N', 'N/+', 'T'].includes(ma) && countOf(ma) > 0) body += `<p>- <strong>${esc((KY_HIEU[ma] && KY_HIEU[ma].label) || ma)}:</strong> <span style="font-weight:normal;">${namesOf(ma)}</span></p>`; }
+    
+    if (vangCount > 0) { 
+        body += `<p class="giay-vang-header"><strong>Vắng: ${vangCount}</strong></p>`; 
+        for (const ma in KY_HIEU) {
+            if (!['+', '+/N', 'N/+', 'T'].includes(ma) && countOf(ma) > 0) {
+                body += `<p>- <strong>${esc((KY_HIEU[ma] && KY_HIEU[ma].label) || ma)}:</strong> <span style="font-weight:normal;">${namesOf(ma)}</span></p>`; 
+            }
+        }
+    }
+    
+    // Đẩy người chấm công lên và hiển thị ĐDHC
     let signer = `<div class="giay-signer"><p style="font-style: italic; margin-bottom: 50px;">Người chấm công</p><p style="font-weight: bold; font-size: 15px;">ĐDHC</p></div>`;
+    
     return `<div class="giay-header"><strong>BV Phổi Đồng Nai – Khoa Cấp cứu</strong></div><h2 class="giay-title">GIẤY CHẤM CÔNG</h2><p class="giay-date">${ngayText}</p><div class="giay-body">${body}</div>${signer}`;
 }
 
@@ -1085,7 +1131,7 @@ document.getElementById('btnExportMonthConfirm')?.addEventListener('click', asyn
             let employeesList = res.employees || res.data || [];
             
             let aoa = [];
-            aoa.push(["BỆNH VIỆN PHỔI ĐỒNG NAI\nKHOA BỆNH CẤP CỨU"]); aoa.push(["BẢNG CHẤM CÔNG"]); aoa.push([`Tháng ${month} Năm ${year}`]);
+            aoa.push(["BỆNH VIỆN PHỔI Đồng Nai\nKHOA BỆNH CẤP CỨU"]); aoa.push(["BẢNG CHẤM CÔNG"]); aoa.push([`Tháng ${month} Năm ${year}`]);
             let r4 = ["STT", "Họ và tên"]; for(let d=1; d<=daysInMonth; d++) r4.push(d); aoa.push(r4);
             
             employeesList.forEach((nv, idx) => {
