@@ -2,17 +2,13 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <!-- Cố định tỷ lệ chống tự động Zoom trên Điện thoại -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chấm công khoa Cấp cứu</title>
     
-    <!-- Tăng tốc độ kết nối tới máy chủ Google -->
     <link rel="preconnect" href="https://script.google.com">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
     
-    <!-- Tải thư viện ngầm để không làm chậm lúc mở trang -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
     
@@ -21,7 +17,6 @@
         :root { --bg:#eef2f7; --surface:#fff; --border:#dde3ed; --text:#0f172a; --muted:#64748b; --primary:#1d4ed8; --green:#16a34a; --radius:10px; --shadow:0 1px 3px rgba(0,0,0,.09); }
         body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x: hidden; }
         
-        /* Màn hình Loading chuyên nghiệp */
         #appLoading { position: fixed; inset: 0; background: #f8fafc; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s; }
         .spinner { border: 4px solid #cbd5e1; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -38,7 +33,6 @@
         
         .app-header input::-webkit-calendar-picker-indicator { filter:invert(1); opacity:.9; cursor:pointer; }
         
-        /* Bắt buộc font 16px trên input để chống Zoom ở iPhone */
         input[type="month"], input[type="number"], input[type="text"], input[type="password"], input[type="date"], select { font-size: 16px !important; }
         input[type="month"], input[type="number"], input[type="text"], input[type="password"] { padding:6px 10px; border:none; border-radius:7px; outline:none; font-weight: 600; }
         
@@ -95,7 +89,7 @@
         .tool-in { color:#475569; background:#f1f5f9; border-color:#cbd5e1; }
         
         .print-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:300; display:flex; align-items:center; justify-content:center; padding:10px; }
-        .print-modal { background:#fff; border-radius:12px; width:100%; max-width:1150px; display:flex; flex-direction:column; padding:12px 16px; box-shadow:0 10px 40px rgba(0,0,0,.2); max-height: 96vh; }
+        .print-modal { background:#fff; border-radius:12px; width:100%; max-width:1150px; display:flex; flex-direction:column; padding:12px 16px; box-shadow:0 10px 40px rgba(0,0,0,.2); max-height: 98vh; }
         .print-modal h3 { font-size:1.05rem; margin-top:0; margin-bottom:10px; color:var(--primary); text-align:center; }
         
         .pg-group-title { background:#f1f5f9; padding:6px 12px; font-weight:700; color:#334155; margin-top:10px; border-radius:6px; font-size:0.8rem; text-transform:uppercase; }
@@ -116,7 +110,6 @@
         .pg-input-wrapper input:disabled { color:#94a3b8; cursor:not-allowed; }
         .pg-input-wrapper input:focus { background:#f8fafc; }
         
-        /* Tối ưu Mobile cho Bảng Phân Giường */
         @media(max-width: 650px) {
             .pg-info { width: 140px; }
             .pg-col-header-spacer { width: 140px; }
@@ -181,7 +174,6 @@
 </head>
 <body>
 
-<!-- Màn hình tải ban đầu -->
 <div id="appLoading">
     <div class="spinner"></div>
     <p style="margin-top: 15px; font-weight: bold; color: var(--primary); font-size: 0.9rem;">Đang tải dữ liệu khoa...</p>
@@ -283,12 +275,6 @@
             <input type="password" id="newPw" placeholder="Mật khẩu mới" style="width:100%; border:1px solid var(--border); margin-bottom:6px; color:#000;">
             <button id="btnChangePw" class="btn btn-green" style="width:100%; padding:6px;">Đổi mật khẩu</button>
         </div>
-        <div style="background:#fef2f2; padding:10px; border-radius:8px; margin-bottom:15px;">
-            <div style="font-weight:700; font-size:0.9rem; margin-bottom:8px; color:#991b1b;">Tạo tài khoản Admin mới</div>
-            <input type="text" id="newAccUser" placeholder="Tên đăng nhập mới" style="width:100%; border:1px solid var(--border); margin-bottom:5px; color:#000;">
-            <input type="password" id="newAccPass" placeholder="Mật khẩu" style="width:100%; border:1px solid var(--border); margin-bottom:8px; color:#000;">
-            <button id="btnAddAcc" class="btn btn-green" style="width:100%; background:#ef4444;">Tạo tài khoản</button>
-        </div>
         <div id="adminMsg" style="text-align:center; font-size:0.8rem; font-weight:600; margin-bottom:8px;"></div>
         <div class="print-modal-actions" style="justify-content:space-between; margin-top:0; padding-top:0; border:none;">
             <button id="btnLogout" class="btn-ghost-light" style="color:#dc2626;">Đăng xuất</button>
@@ -342,8 +328,11 @@
 
 <div id="lichTrucModal" class="print-modal-overlay" style="display:none;">
     <div class="print-modal" style="max-width: 900px;">
-        <h3 style="margin-bottom:8px;">📅 Lịch Trực Tuần <span id="lichTrucWeekText" style="font-size: 0.9rem; color: var(--muted); font-weight: normal; margin-left: 5px;"></span></h3>
-        <div style="display:flex; justify-content:center; gap: 6px; margin-bottom: 10px; align-items:center;">
+        <h3 style="margin-bottom:8px; display:flex; justify-content:center; align-items:center; gap:10px;">
+            📅 Lịch Trực Tuần <span id="lichTrucWeekText" style="font-size: 0.9rem; color: var(--muted); font-weight: normal;"></span>
+            <button id="btnCopyLichTrucLink" style="background:none; border:none; cursor:pointer; font-size:1.2rem; outline:none; transition:transform 0.2s;" title="Copy link Lịch trực">🔗</button>
+        </h3>
+        <div id="lichTrucHeaderUI" style="display:flex; justify-content:center; gap: 6px; margin-bottom: 10px; align-items:center;">
             <button id="btnPrevWeek" class="btn-ghost-light" style="padding: 5px 10px; border: 1px solid var(--border);">◀ Trước</button>
             <input type="date" id="lichTrucDate" style="border: 1px solid var(--border); padding: 5px 8px; border-radius: 6px; color: var(--text); background: white; font-weight: 700; width: 130px; text-align: center; font-size:0.85rem;">
             <button id="btnNextWeek" class="btn-ghost-light" style="padding: 5px 10px; border: 1px solid var(--border);">Sau ▶</button>
@@ -534,7 +523,6 @@ const saveCount = document.getElementById('saveCount');
 const gridCC = document.getElementById('gridChamCong');
 const btnSaveBottom = document.getElementById('btnSaveBottom');
 
-// API FETCH TỐI ƯU CHỐNG LỖI MÁY CHỦ BẮT ĐĂNG NHẬP
 async function apiFetch(method, action, params={}) {
     try {
         let q = new URLSearchParams();
@@ -566,8 +554,30 @@ async function apiFetch(method, action, params={}) {
 
 (async () => {
     try {
-        const urlParams = new URLSearchParams(window.location.search); if (urlParams.get('view') === 'lichtruc') return; 
-        const today = todayStr(); ngayInput.value = today; updateDateDisplay(today);
+        const urlParams = new URLSearchParams(window.location.search); 
+        const today = todayStr(); 
+        
+        // KIỂM TRA CHẾ ĐỘ "XEM LỊCH TRỰC ĐỘC LẬP"
+        if (urlParams.get('view') === 'lichtruc') {
+            document.querySelector('.app-header').style.display = 'none';
+            document.querySelector('.status-bar').style.display = 'none';
+            document.querySelector('.main-content').style.display = 'none';
+            document.querySelector('.bottom-container').style.display = 'none';
+            
+            const loadingScreen = document.getElementById('appLoading');
+            if(loadingScreen) loadingScreen.style.display = 'none';
+            
+            const modal = document.getElementById('lichTrucModal');
+            modal.style.display = 'flex';
+            modal.style.background = '#eef2f7';
+            document.getElementById('lichTrucCloseWrapper').style.display = 'none';
+            
+            document.getElementById('lichTrucDate').value = today;
+            loadLichTrucData();
+            return; 
+        }
+
+        ngayInput.value = today; updateDateDisplay(today);
         
         try {
             const cachedKyHieu = localStorage.getItem('kyhieu'); const cachedHolidays = localStorage.getItem('holidays');
@@ -578,7 +588,6 @@ async function apiFetch(method, action, params={}) {
         const res = await apiFetch('GET', 'init', { ngay: today });
       
         if (res.success) {
-            // Đóng màn hình Loading ngay khi nhận được dữ liệu
             const loadingScreen = document.getElementById('appLoading');
             if(loadingScreen) { loadingScreen.style.opacity = '0'; setTimeout(()=> loadingScreen.style.display = 'none', 300); }
             
@@ -659,9 +668,6 @@ function processDayData(data, sheetName, sheetGid, isLocked24h) {
 window.updateBedCount = function(inp) {
     let countDiv = inp.previousElementSibling;
     if(!countDiv || !countDiv.classList.contains('bed-count')) return;
-    
-    // Nếu ô bị khóa TRỪ KHI LÀ ADMIN, KHÔNG chặn đếm số giường
-    // Nhưng vì mình muốn đếm luôn cả khi disable, ta gỡ bỏ điều kiện return này
     if(!inp.value.trim()) { countDiv.textContent = '0'; return; }
     
     let str = inp.value.replace(/giường/gi, '').replace(/g/gi, '').replace(/sáng:/gi, '').replace(/chiều:/gi, '').replace(/đến/gi, '-').replace(/ĐẾN/gi, '-').replace(/\s+/g, '');
@@ -792,8 +798,7 @@ btnSaveBottom?.addEventListener('click', async () => {
     } catch(err) { setMsg(saveMessage, '❌ Lỗi: ' + err.message, 'msg-error'); } 
 });
 
-
-// ================= LOGIC PHÂN GIƯỜNG NGÀY & AUTO CHIA =================
+// ================= LOGIC PHÂN GIƯỜNG NGÀY =================
 document.getElementById('btnShowPhanGiuongNgay')?.addEventListener('click', () => {
     document.getElementById('phanGiuongNgayDate').value = ngayInput.value || todayStr();
     document.getElementById('phanGiuongNgayContent').innerHTML = `<p style="text-align:center; color:var(--muted); font-size:0.9rem;">Bấm "Tải bảng đã lưu" hoặc "Chia lại tự động" để tải danh sách</p>`;
@@ -801,7 +806,6 @@ document.getElementById('btnShowPhanGiuongNgay')?.addEventListener('click', () =
     document.getElementById('btnSendZalo').style.display = 'none';
     document.getElementById('phanGiuongNgayModal').style.display = 'flex';
     
-    // Nếu Live Update (Chưa lưu) thì dùng Unsaved Entries
     const entries = [...gridCC.querySelectorAll('select')].map(s => ({ten: s.dataset.ten, kyhieu: s.value}));
     loadPhanGiuongNgay(false, entries); 
 });
@@ -910,7 +914,7 @@ document.getElementById('btnPhanGiuongNgaySave')?.addEventListener('click', asyn
     } catch(err) { alert('Lỗi: ' + err.message); } finally { btnSave.disabled = false; btnSave.innerHTML = '💾 Lưu cấu hình tùy chỉnh'; }
 });
 
-// ZALO CHỤP HÌNH GỬI ĐIỆN THOẠI (BẢN TỐI ƯU SIÊU NÉT & ĐẦY ĐỦ CHO MOBILE)
+// ZALO CHỤP HÌNH GỬI ĐIỆN THOẠI
 document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
     const btn = document.getElementById('btnSendZalo');
     const oldText = btn.innerHTML;
@@ -922,7 +926,6 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
     const footerUI = document.getElementById('pgnFooterUI');
     const titleUI = document.getElementById('pgnModalTitle');
     
-    // Tạm ẩn thanh công cụ
     const origHeaderDisplay = headerUI.style.display;
     const origFooterDisplay = footerUI.style.display;
     const origTitleDisplay = titleUI.style.display;
@@ -930,7 +933,6 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
     footerUI.style.display = 'none';
     titleUI.style.display = 'none';
     
-    // Loại bỏ mọi ràng buộc giấu nội dung (overflow) để bung toàn bộ bảng
     const origOverlayPos = document.getElementById('phanGiuongNgayModal').style.position;
     const origOverlayAlign = document.getElementById('phanGiuongNgayModal').style.alignItems;
     document.getElementById('phanGiuongNgayModal').style.position = 'absolute';
@@ -939,7 +941,6 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
     const origMaxHeight = modalBox.style.maxHeight;
     const origOverflow = modalBox.style.overflowY;
     
-    // QUAN TRỌNG NHẤT: Ép Modal rộng tối thiểu 900px để giữ nguyên format Máy tính, dù đang ở trên Mobile
     const origWidth = modalBox.style.width;
     const origMaxWidth = modalBox.style.maxWidth;
     modalBox.style.width = '900px';
@@ -957,9 +958,8 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
 
     try {
         window.scrollTo(0,0);
-        await new Promise(r => setTimeout(r, 400)); // Chờ trình duyệt reflow
+        await new Promise(r => setTimeout(r, 400)); 
         
-        // Chụp khung hình với kích thước đã bung
         const canvas = await html2canvas(modalBox, { 
             scale: 2, 
             backgroundColor: "#ffffff",
@@ -988,7 +988,6 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
         }, 'image/png');
     } catch(err) { alert('Lỗi chụp ảnh: ' + err.message); } 
     finally {
-        // Trả lại nguyên trạng Mobile UI
         printHeader.remove();
         headerUI.style.display = origHeaderDisplay;
         footerUI.style.display = origFooterDisplay;
@@ -1007,17 +1006,15 @@ document.getElementById('btnSendZalo')?.addEventListener('click', async () => {
     }
 });
 
-
-// ================= LOGIC PHÂN GIƯỜNG MẪU THÁNG =================
+// ================= LOGIC MẪU THÁNG =================
 document.getElementById('btnShowPhanGiuongThang')?.addEventListener('click', () => {
     const d = ngayInput.value ? parseNgay(ngayInput.value) : new Date(); document.getElementById('phanGiuongThangThang').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
     document.getElementById('phanGiuongThangContent').innerHTML = `<p style="text-align:center; color:var(--muted); font-size:0.9rem;">Chọn tháng và bấm "Tải danh sách"</p>`;
     document.getElementById('btnPhanGiuongThangSave').disabled = true; document.getElementById('phanGiuongThangModal').style.display = 'flex';
-    document.getElementById('btnLoadPhanGiuongThang').click(); // Tự động load ngay
+    document.getElementById('btnLoadPhanGiuongThang').click(); 
 });
 document.getElementById('btnPhanGiuongThangClose')?.addEventListener('click', () => { document.getElementById('phanGiuongThangModal').style.display = 'none'; });
 
-// Phím mũi tên đổi tháng mẫu tháng
 document.getElementById('btnPgmPrevMonth')?.addEventListener('click', () => {
     let m = document.getElementById('phanGiuongThangThang').value; if(!m) return;
     let parts = m.split('-'); let d = new Date(parts[0], parseInt(parts[1])-1 - 1, 1);
@@ -1079,6 +1076,16 @@ document.getElementById('btnLichTrucClose')?.addEventListener('click', () => { d
 document.getElementById('btnPrevWeek')?.addEventListener('click', () => { const d = parseNgay(document.getElementById('lichTrucDate').value); d.setDate(d.getDate() - 7); document.getElementById('lichTrucDate').value = formatNgayInput(d); loadLichTrucData(); });
 document.getElementById('btnNextWeek')?.addEventListener('click', () => { const d = parseNgay(document.getElementById('lichTrucDate').value); d.setDate(d.getDate() + 7); document.getElementById('lichTrucDate').value = formatNgayInput(d); loadLichTrucData(); });
 document.getElementById('lichTrucDate')?.addEventListener('change', () => loadLichTrucData());
+
+// THÊM CHỨC NĂNG COPY LINK LỊCH TRỰC ĐỘC LẬP
+document.getElementById('btnCopyLichTrucLink')?.addEventListener('click', () => {
+    const url = APPS_SCRIPT_URL + "?view=lichtruc";
+    navigator.clipboard.writeText(url).then(() => {
+        alert("✅ Đã copy link Lịch Trực Độc Lập!\nBạn có thể gửi link này cho người khác hoặc chiếu lên Tivi.");
+    }).catch(() => {
+        prompt("Hãy copy thủ công đường link bên dưới:", url);
+    });
+});
 
 function formatNgayInput(dateObj) { return `${dateObj.getFullYear()}-${pad(dateObj.getMonth()+1)}-${pad(dateObj.getDate())}`; }
 
