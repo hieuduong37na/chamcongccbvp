@@ -152,7 +152,9 @@
             .giay-body p.sub { margin-left: 20px !important; }
             .giay-summary { margin-bottom: 8px !important; font-size: 14px; }
             .giay-vang-header { margin-top: 15px !important; margin-bottom: 4px !important; font-size: 14px;}
-            .giay-signer { margin-top: auto; text-align: right; font-style: italic; font-size: 14px; padding-bottom: 10px; padding-right: 10px; }
+            
+            /* Tùy chỉnh người ký A5 */
+            .giay-signer { margin-top: 30px; text-align: right; font-size: 14px; padding-right: 20px; }
         }
     </style>
 </head>
@@ -225,26 +227,21 @@
 <div id="adminPanelModal" class="print-modal-overlay" style="display:none; z-index:400;">
     <div class="print-modal print-modal-small">
         <h3 style="margin-top:0; color:#1e40af;">👑 Bảng điều khiển Admin</h3>
-        
         <div style="background:#f0fdf4; padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #bbf7d0;">
             <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:#166534; border-bottom:1px solid #bbf7d0; padding-bottom:5px;">⚙️ Cài đặt Khoa & Chức danh</div>
-            
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                 <span style="font-size:0.8rem; font-weight:600; color:#0f172a;">Tổng số giường:</span>
                 <input type="number" id="adminTotalBeds" style="width:80px; border:1px solid var(--border); font-weight:700; text-align:center; color:#0f172a;">
             </div>
-            
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                 <span style="font-size:0.8rem; font-weight:600; color:#0f172a;">Giường nhận bệnh:</span>
                 <input type="text" id="adminReceivingBeds" placeholder="Vd: 1, 2" style="width:80px; border:1px solid var(--border); font-weight:700; text-align:center; color:#0f172a;">
             </div>
-
-            <div style="font-size:0.75rem; font-weight:800; color:#166534; margin-top:15px; margin-bottom:4px;">BÁC SĨ (Ký hiệu)</div>
+            <div style="font-size:0.75rem; font-weight:800; color:#166534; margin-top:10px; margin-bottom:4px;">BÁC SĨ (Ký hiệu)</div>
             <div style="display:flex; gap:8px; margin-bottom:8px;">
                 <div style="flex:1;"><div style="font-size:0.65rem; color:#475569; margin-bottom:2px;">Khám bệnh</div><input type="text" id="adminRolesBsKb" style="width:100%; border:1px solid var(--border); text-align:center; padding:4px;"></div>
                 <div style="flex:1;"><div style="font-size:0.65rem; color:#475569; margin-bottom:2px;">Trưởng khoa (Ẩn)</div><input type="text" id="adminRolesBsTk" style="width:100%; border:1px solid var(--border); text-align:center; padding:4px;"></div>
             </div>
-
             <div style="font-size:0.75rem; font-weight:800; color:#166534; margin-top:8px; margin-bottom:4px;">ĐIỀU DƯỠNG (Ký hiệu)</div>
             <div style="display:flex; gap:8px; margin-bottom:8px;">
                 <div style="flex:1;"><div style="font-size:0.65rem; color:#475569; margin-bottom:2px;">Chăm sóc</div><input type="text" id="adminRolesDdCs" style="width:100%; border:1px solid var(--border); text-align:center; padding:4px;"></div>
@@ -253,18 +250,11 @@
             </div>
             <button id="btnSaveSettings" class="btn btn-green" style="width:100%; margin-top:5px; padding:6px;">Lưu cài đặt</button>
         </div>
-
         <div style="background:#f8fafc; padding:10px; border-radius:8px; margin-bottom:10px;">
             <div style="font-weight:700; font-size:0.85rem; margin-bottom:6px; color:#0f172a;">Thay đổi mật khẩu</div>
             <input type="password" id="oldPw" placeholder="Mật khẩu cũ" style="width:100%; border:1px solid var(--border); margin-bottom:4px; color:#000;">
             <input type="password" id="newPw" placeholder="Mật khẩu mới" style="width:100%; border:1px solid var(--border); margin-bottom:6px; color:#000;">
             <button id="btnChangePw" class="btn btn-green" style="width:100%; padding:6px;">Đổi mật khẩu</button>
-        </div>
-        <div style="background:#fef2f2; padding:10px; border-radius:8px; margin-bottom:15px;">
-            <div style="font-weight:700; font-size:0.9rem; margin-bottom:8px; color:#991b1b;">Tạo tài khoản Admin mới</div>
-            <input type="text" id="newAccUser" placeholder="Tên đăng nhập mới" style="width:100%; border:1px solid var(--border); margin-bottom:5px; color:#000;">
-            <input type="password" id="newAccPass" placeholder="Mật khẩu" style="width:100%; border:1px solid var(--border); margin-bottom:8px; color:#000;">
-            <button id="btnAddAcc" class="btn btn-green" style="width:100%; background:#ef4444;">Tạo tài khoản</button>
         </div>
         <div id="adminMsg" style="text-align:center; font-size:0.8rem; font-weight:600; margin-bottom:8px;"></div>
         <div class="print-modal-actions" style="justify-content:space-between; margin-top:0; padding-top:0; border:none;">
@@ -278,7 +268,6 @@
 <div id="phanGiuongNgayModal" class="print-modal-overlay" style="display:none;">
     <div class="print-modal" id="captureModalArea">
         <h3 id="pgnModalTitle">🛏️ Bảng Phân Giường Theo Ngày</h3>
-        
         <div id="pgnHeaderUI" style="display:flex; justify-content:center; gap: 8px; margin-bottom: 10px; align-items:center; flex-wrap:wrap;">
             <div class="date-picker-group" style="background:#f8fafc; border:1.5px solid var(--border);">
                 <button id="btnPgPrevDay" style="color:var(--primary); padding:4px 8px;">◀</button>
@@ -288,9 +277,7 @@
             <button id="btnLoadPhanGiuongNgay" class="btn btn-ghost-light" style="border: 1px solid var(--primary); color: var(--primary); padding:5px 10px;">📥 Tải bảng</button>
             <button id="btnForceAutoChia" class="btn btn-green" style="background:#ea580c; display:none; padding:5px 10px;">🔄 Chia Lại</button>
         </div>
-
         <div id="phanGiuongNgayContent" style="flex:1; overflow-y:auto; padding-right:4px; margin-bottom:10px;"></div>
-        
         <div id="pgnFooterUI" class="print-modal-actions">
             <button id="btnPhanGiuongNgayClose" class="btn-ghost-light" type="button" style="padding:6px 12px;">Đóng</button>
             <div style="display:flex; gap:8px;">
@@ -514,6 +501,7 @@ const saveCount = document.getElementById('saveCount');
 const gridCC = document.getElementById('gridChamCong');
 const btnSaveBottom = document.getElementById('btnSaveBottom');
 
+// API FETCH TỐI ƯU CHỐNG LỖI MÁY CHỦ BẮT ĐĂNG NHẬP
 async function apiFetch(method, action, params={}) {
     try {
         let q = new URLSearchParams();
@@ -943,10 +931,11 @@ document.getElementById('btnShowPhanGiuongThang')?.addEventListener('click', () 
     const d = ngayInput.value ? parseNgay(ngayInput.value) : new Date(); document.getElementById('phanGiuongThangThang').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
     document.getElementById('phanGiuongThangContent').innerHTML = `<p style="text-align:center; color:var(--muted); font-size:0.9rem;">Chọn tháng và bấm "Tải danh sách"</p>`;
     document.getElementById('btnPhanGiuongThangSave').disabled = true; document.getElementById('phanGiuongThangModal').style.display = 'flex';
-    document.getElementById('btnLoadPhanGiuongThang').click(); 
+    document.getElementById('btnLoadPhanGiuongThang').click(); // Tự động load ngay
 });
 document.getElementById('btnPhanGiuongThangClose')?.addEventListener('click', () => { document.getElementById('phanGiuongThangModal').style.display = 'none'; });
 
+// Phím mũi tên đổi tháng mẫu tháng
 document.getElementById('btnPgmPrevMonth')?.addEventListener('click', () => {
     let m = document.getElementById('phanGiuongThangThang').value; if(!m) return;
     let parts = m.split('-'); let d = new Date(parts[0], parseInt(parts[1])-1 - 1, 1);
@@ -1060,12 +1049,13 @@ function buildGiayHtml(ngayStr, data) {
     const namesOf = ma => (bySymbol[ma]||[]).map(esc).join(', '); const countOf = ma => (bySymbol[ma]||[]).length;
     const hienDienCount = ['+', '+/N', 'N/+', 'T'].reduce((s,ma) => s + countOf(ma), 0); const vangCount = Object.values(bySymbol).reduce((s,arr) => s + arr.length, 0) - hienDienCount;
     let body = `<p class="giay-summary"><strong>Tổng: ${data.length} — Hiện diện: ${hienDienCount}</strong></p>`;
-    if (countOf('+') > 0) body += `<p>- ${esc((KY_HIEU['+']||{}).label || 'Làm ngày')}: ${namesOf('+')}</p>`;
-    if (countOf('+/N') > 0) body += `<p class="sub">+ Làm sáng: ${namesOf('+/N')}</p>`;
-    if (countOf('N/+') > 0) body += `<p class="sub">+ Làm chiều: ${namesOf('N/+')}</p>`;
-    if (countOf('T') > 0) body += `<p>- Trực: ${namesOf('T')}</p>`;
-    if (vangCount > 0) { body += `<p class="giay-vang-header"><strong>Vắng: ${vangCount}</strong></p>`; for (const ma in KY_HIEU) if (!['+', '+/N', 'N/+', 'T'].includes(ma) && countOf(ma) > 0) body += `<p>- ${esc((KY_HIEU[ma] && KY_HIEU[ma].label) || ma)}: ${namesOf(ma)}</p>`; }
-    return `<div class="giay-header"><strong>BV Phổi Đồng Nai – Khoa Cấp cứu<strong></div><h2 class="giay-title">GIẤY CHẤM CÔNG</h2><p class="giay-date">${ngayText}</p><div class="giay-body">${body}</div><p class="giay-signer">Người chấm công</p>`;
+    if (countOf('+') > 0) body += `<p>- <strong>${esc((KY_HIEU['+']||{}).label || 'Làm ngày')}:</strong> <span style="font-weight:normal;">${namesOf('+')}</span></p>`;
+    if (countOf('+/N') > 0) body += `<p class="sub">+ <strong>Làm sáng:</strong> <span style="font-weight:normal;">${namesOf('+/N')}</span></p>`;
+    if (countOf('N/+') > 0) body += `<p class="sub">+ <strong>Làm chiều:</strong> <span style="font-weight:normal;">${namesOf('N/+')}</span></p>`;
+    if (countOf('T') > 0) body += `<p>- <strong>Trực:</strong> <span style="font-weight:normal;">${namesOf('T')}</span></p>`;
+    if (vangCount > 0) { body += `<p class="giay-vang-header"><strong>Vắng: ${vangCount}</strong></p>`; for (const ma in KY_HIEU) if (!['+', '+/N', 'N/+', 'T'].includes(ma) && countOf(ma) > 0) body += `<p>- <strong>${esc((KY_HIEU[ma] && KY_HIEU[ma].label) || ma)}:</strong> <span style="font-weight:normal;">${namesOf(ma)}</span></p>`; }
+    let signer = `<div class="giay-signer"><p style="font-style: italic; margin-bottom: 50px;">Người chấm công</p><p style="font-weight: bold; font-size: 15px;">ĐDHC</p></div>`;
+    return `<div class="giay-header"><strong>BV Phổi Đồng Nai – Khoa Cấp cứu</strong></div><h2 class="giay-title">GIẤY CHẤM CÔNG</h2><p class="giay-date">${ngayText}</p><div class="giay-body">${body}</div>${signer}`;
 }
 
 document.getElementById('btnShowExportMonth')?.addEventListener('click', () => { 
