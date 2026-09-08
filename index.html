@@ -275,6 +275,12 @@
             <input type="password" id="newPw" placeholder="Mật khẩu mới" style="width:100%; border:1px solid var(--border); margin-bottom:6px; color:#000;">
             <button id="btnChangePw" class="btn btn-green" style="width:100%; padding:6px;">Đổi mật khẩu</button>
         </div>
+        <div style="background:#fef2f2; padding:10px; border-radius:8px; margin-bottom:15px;">
+            <div style="font-weight:700; font-size:0.9rem; margin-bottom:8px; color:#991b1b;">Tạo tài khoản Admin mới</div>
+            <input type="text" id="newAccUser" placeholder="Tên đăng nhập mới" style="width:100%; border:1px solid var(--border); margin-bottom:5px; color:#000;">
+            <input type="password" id="newAccPass" placeholder="Mật khẩu" style="width:100%; border:1px solid var(--border); margin-bottom:8px; color:#000;">
+            <button id="btnAddAcc" class="btn btn-green" style="width:100%; background:#ef4444;">Tạo tài khoản</button>
+        </div>
         <div id="adminMsg" style="text-align:center; font-size:0.8rem; font-weight:600; margin-bottom:8px;"></div>
         <div class="print-modal-actions" style="justify-content:space-between; margin-top:0; padding-top:0; border:none;">
             <button id="btnLogout" class="btn-ghost-light" style="color:#dc2626;">Đăng xuất</button>
@@ -385,13 +391,14 @@
 
 <script>
 // =============== ĐIỀN ĐƯỜNG LINK CỦA BẠN VÀO ĐÂY ===============
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbytF_0W0_B5--RGfcOcpfrKcBYCQbYHHDkCfPFox7bgFbWQ4U69_Au-nKbnzGaKBcai/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby3j1H98-yXwDng43aR6m7_k627n2pXk4q3qf7N8tN0h9D4_o-J18sV54V6P2Y/exec";
 window.GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1quOFnjezLTWxUuo2Wj0LWdmqjpat7knyY7D8Kconw9A/edit";
 // ===============================================================
 
 const THU = ['Chủ nhật','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7'];
 let KY_HIEU = {}; let currentData = []; let holidaysData = {}; let isLocked = false; 
 let isLocked24hStatus = false;
+let currentEditCount = 0;
 
 let totalBedsKhoa = localStorage.getItem('total_beds') || 50;
 let receivingBedsKhoa = localStorage.getItem('receiving_beds') || '';
@@ -407,7 +414,7 @@ const btnOpenLogin = document.getElementById('btnOpenLogin');
 
 function isAdminActive() { return (loggedUser !== '' && loggedToken !== ''); }
 
-function setMsg(el, t, cls) { if(el) { el.textContent = t; el.className = cls || ''; } }
+function setMsg(el, t, cls) { if(el) { el.innerHTML = t; el.className = cls || ''; } }
 function clearMsg(el) { if(el) { el.textContent = ''; el.className = ''; } }
 function esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
 function escAttr(s) { return esc(s).replace(/"/g, '&quot;'); }
@@ -557,7 +564,6 @@ async function apiFetch(method, action, params={}) {
         const urlParams = new URLSearchParams(window.location.search); 
         const today = todayStr(); 
         
-        // KIỂM TRA CHẾ ĐỘ "XEM LỊCH TRỰC ĐỘC LẬP"
         if (urlParams.get('view') === 'lichtruc') {
             document.querySelector('.app-header').style.display = 'none';
             document.querySelector('.status-bar').style.display = 'none';
@@ -603,7 +609,7 @@ async function apiFetch(method, action, params={}) {
             rolesDdHcKhoa = res.rolesDdHc || 'ĐDHC'; localStorage.setItem('roles_dd_hc', rolesDdHcKhoa);
             rolesDdPtKhoa = res.rolesDdPt || 'PTĐD'; localStorage.setItem('roles_dd_pt', rolesDdPtKhoa);
             
-            updateDateDisplay(today); processDayData(res.data || res.dayData, res.sheetName, res.sheetGid, res.isLocked24h);
+            updateDateDisplay(today); processDayData(res.data || res.dayData, res.sheetName, res.sheetGid, res.isLocked24h, res.editCount);
         } else { setMsg(loadMessage, '⚠️ ' + res.message, 'msg-error'); }
     } catch(err) {
         alert("Lỗi khởi tạo hệ thống: " + err.message);
@@ -641,12 +647,13 @@ async function loadDay(ngay) {
     sheetInfo.innerHTML = ''; setMsg(loadMessage, '⏳ Đang tải...', 'msg-loading');
     const res = await apiFetch('GET', 'day', { ngay });
     if (!res.success) { setMsg(loadMessage, '⚠️ ' + res.message, 'msg-error'); return; }
-    processDayData(res.data, res.sheetName, res.sheetGid, res.isLocked24h);
+    processDayData(res.data, res.sheetName, res.sheetGid, res.isLocked24h, res.editCount);
 }
 
-function processDayData(data, sheetName, sheetGid, isLocked24h) {
+function processDayData(data, sheetName, sheetGid, isLocked24h, editCount) {
     currentData = data || []; isLocked = currentData.some(r => r.kyhieu && String(r.kyhieu).trim() !== '');
     isLocked24hStatus = isLocked24h;
+    currentEditCount = parseInt(editCount) || 0;
     
     sheetInfo.innerHTML = `<span class="sheet-tag"> ${esc(sheetName||'')}</span>&nbsp;${currentData.length} nhân sự`;
     clearMsg(loadMessage);
@@ -655,9 +662,17 @@ function processDayData(data, sheetName, sheetGid, isLocked24h) {
     
     renderGrid(); document.getElementById('saveFooter').classList.add('visible'); updateCount();
     
-    if (!isAdminActive() && isLocked24hStatus) {
+    if (!isAdminActive() && (isLocked24hStatus || currentEditCount >= 3)) {
         isLocked = true; document.querySelectorAll('.nv-select').forEach(s => s.disabled = true);
-        btnSaveBottom.disabled = true; btnSaveBottom.textContent = '🔒 Đã qua 24h, không thể sửa';
+        btnSaveBottom.disabled = true; 
+        
+        if (isLocked24hStatus) {
+            btnSaveBottom.textContent = '🔒 Đã qua 24h, không thể sửa';
+            document.getElementById('limitDesc').innerHTML = `Ngày này đã quá hạn 24 tiếng nên hệ thống tự động khóa.<br><br>Vui lòng <b>liên hệ Admin</b> để mở lại!`;
+        } else {
+            btnSaveBottom.textContent = '🔒 Hết lượt sửa ngày này';
+            document.getElementById('limitDesc').innerHTML = `Bạn chỉ được phép sửa bảng chấm công tối đa 3 lần/ngày.<br><br>Vui lòng <b>liên hệ Admin</b> để mở lại!`;
+        }
         document.getElementById('limitTitle').textContent = `Đã khóa ngày ${ngayInput.value}`;
         document.getElementById('limitModal').style.display = 'flex';
     } else {
@@ -781,8 +796,9 @@ btnSaveBottom?.addEventListener('click', async () => {
         const res = await apiFetch('POST', 'save', { ngay: ngayInput.value, entries: JSON.stringify(entries), user: loggedUser, token: loggedToken });
         if(res.limitReached) {
             document.getElementById('limitTitle').textContent = `Đã khóa bảng công`;
+            document.getElementById('limitDesc').innerHTML = res.message;
             document.getElementById('limitModal').style.display = 'flex';
-            setMsg(saveMessage, '❌ Quá 24h, chỉ Admin được sửa', 'msg-error');
+            setMsg(saveMessage, '❌ Quá giới hạn sửa', 'msg-error');
         } else {
             if (res.success) { 
                 isLocked = true; document.querySelectorAll('.nv-select').forEach(s => s.disabled = true); 
@@ -1011,7 +1027,7 @@ document.getElementById('btnShowPhanGiuongThang')?.addEventListener('click', () 
     const d = ngayInput.value ? parseNgay(ngayInput.value) : new Date(); document.getElementById('phanGiuongThangThang').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
     document.getElementById('phanGiuongThangContent').innerHTML = `<p style="text-align:center; color:var(--muted); font-size:0.9rem;">Chọn tháng và bấm "Tải danh sách"</p>`;
     document.getElementById('btnPhanGiuongThangSave').disabled = true; document.getElementById('phanGiuongThangModal').style.display = 'flex';
-    document.getElementById('btnLoadPhanGiuongThang').click(); 
+    document.getElementById('btnLoadPhanGiuongThang').click(); // Tự động load ngay
 });
 document.getElementById('btnPhanGiuongThangClose')?.addEventListener('click', () => { document.getElementById('phanGiuongThangModal').style.display = 'none'; });
 
@@ -1077,7 +1093,6 @@ document.getElementById('btnPrevWeek')?.addEventListener('click', () => { const 
 document.getElementById('btnNextWeek')?.addEventListener('click', () => { const d = parseNgay(document.getElementById('lichTrucDate').value); d.setDate(d.getDate() + 7); document.getElementById('lichTrucDate').value = formatNgayInput(d); loadLichTrucData(); });
 document.getElementById('lichTrucDate')?.addEventListener('change', () => loadLichTrucData());
 
-// THÊM CHỨC NĂNG COPY LINK LỊCH TRỰC ĐỘC LẬP
 document.getElementById('btnCopyLichTrucLink')?.addEventListener('click', () => {
     const url = APPS_SCRIPT_URL + "?view=lichtruc";
     navigator.clipboard.writeText(url).then(() => {
